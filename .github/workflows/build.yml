@@ -81,6 +81,9 @@ jobs:
           sep-tags: " "
           sep-annotations: " "
 
+      - name: List files
+        run: ls -alR src
+
       - name: Build Container Image
         id: build_image
         uses: redhat-actions/buildah-build@v2
