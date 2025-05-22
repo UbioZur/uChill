@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   tests:
-    uses: reusable-test.yml
+    uses: ./.github/workflows/reusable-tests.yml
 
   build:
     needs: tests
