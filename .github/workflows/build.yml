@@ -86,8 +86,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           context: src
-          containerfiles: |
-            .Containerfile
+          containerfiles: src/.Containerfile
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
