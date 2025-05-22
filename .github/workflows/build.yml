@@ -67,9 +67,9 @@ jobs:
         with:
           tags: |
             type=raw,value=${{ env.IMAGE_TAG }}
-            type=raw,value=${{ env.IMAGE_VTAG }}
+            #type=raw,value=${{ env.IMAGE_VTAG }}
             #type=raw,value=${{ env.IMAGE_VTAG }}-{{ date 'YYYYMMDDHHmm' }}
-            type=raw,value=${{ env.IMAGE_VTAG }}-${{ steps.date.outputs.date }}
+            #type=raw,value=${{ env.IMAGE_VTAG }}-${{ steps.date.outputs.date }}
           labels: |  
             org.opencontainers.image.created=${{ steps.date.outputs.date }}
             org.opencontainers.image.description=${{ env.IMAGE_DESC }}
