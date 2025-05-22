@@ -66,7 +66,7 @@ jobs:
         id: metadata
         with:
           tags: |
-            type=raw,value=${{ env.IMAGE_TAG }}
+            type=raw,value='${{ env.IMAGE_TAG }}'
             #type=raw,value=${{ env.IMAGE_VTAG }}
             #type=raw,value=${{ env.IMAGE_VTAG }}-{{ date 'YYYYMMDDHHmm' }}
             #type=raw,value=${{ env.IMAGE_VTAG }}-${{ steps.date.outputs.date }}
