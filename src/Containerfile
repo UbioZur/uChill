@@ -1,0 +1,39 @@
+## ~  UbioZur - https://github.com/UbioZur  ~ ##
+MAINAINER UbioZur
+
+# Base image data
+ARG FEDORA_IMAGE="ghcr.io/ublue-os/base-main"
+ARG FEDORA_VERSION=42
+
+# Set to 1 for debug mode
+
+# Allow scripts to be bind mounted
+# https://hub.docker.com/_/scratch
+FROM scratch AS ctx
+COPY scripts /
+COPY *.pkg /
+
+# Create from the base image
+FROM ${FEDORA_IMAGE}:${FEDORA_VERSION} AS uchill
+
+ARG DEBUG="${DEBUG}"
+
+# Copy all the files inside system folder to the container
+COPY system /
+
+# Mount scripts, temporary folders and run the scripts
+# Run scripts on their separate RUN command to make development easier 
+# as it should not redownload the packages every times!
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=tmpfs,dst=/tmp \
+    /ctx/packages.sh
+
+RUN --mount=type=bind,from=ctx,source=/,target=/ctx \
+    /ctx/cleanup.sh
+
+# Verify Container image
+RUN bootc container lint
+RUN ostree container commit

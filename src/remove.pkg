@@ -1,0 +1,13 @@
+## ~  UbioZur - https://github.com/UbioZur  ~ ##
+
+# List of packages to remove with dnf
+# One package per line
+# Make sure package exist https://packages.fedoraproject.org/
+
+firefox*
+kde-connect*
+kdeconnectd
+#kmenuedit
+#plasma-welcome
+#filelight
+#kfind

@@ -1,0 +1,147 @@
+## ~  UbioZur - https://github.com  ~ ##
+---
+name: Build uChill Image
+on:
+# Run the build every Mondays 08:00 JST, or Sundays 23:00 UTC
+  schedule:
+    - cron: 'o 23 * * 0'
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - 'src/**'
+  pull_request:
+    branches:
+      - main
+      - dev
+    path:
+      - 'src/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.brand_name}}-${{ inputs.stream_name }}
+  cancel-in-progress: true
+      
+jobs:
+  tests:
+    uses: ./.github/workflows/reusable-test.yml
+
+  build:
+    needs: tests
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Load environement file
+        run: |
+          file="${{ github.ref_name }}.env"
+          if [[ ! -f ${file}  ]]; then
+            echo -e "\e[1;34mGithub Build\e[0m  \e[1;31mERROR\e[0m  No File \e[36m${file}\e[0m! Will use dev.env instead!"
+            file="dev.env"
+          fi
+          while IFS='=' read -r key value; do
+            if [[ ! $key =~ ^# && -n $key ]]; then
+              echo "$key=$value" >> $GITHUB_ENV
+            fi
+          done < $file
+
+      - name: Get current date
+          id: date
+          run: |
+            echo "date=$(date -u +%Y\-%m\-%d\T%H\:%M\:%S\Z)" >> $GITHUB_OUTPUT
+  
+      - name: Image Metadata
+        uses: docker/metadata-action@v5
+        id: metadata
+        with:
+          tags: |
+            type=raw,value=${IMAGE_TAG}
+            type=raw,value=${IMAGE_VTAG}
+            type=raw,value=${IMAGE_VTAG}-{{ date 'YYYYMMDDHHmm' }}
+          labels: |
+            org.opencontainers.image.created=${{ steps.date.outputs.date }}
+            org.opencontainers.image.description=${IMAGE_DESC}
+            org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.url=https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}
+            org.opencontainers.image.vendor=${{ github.repository_owner }}
+            org.opencontainers.image.version=${IMAGE_TAG}
+            containers.bootc=1
+          sep-tags: " "
+          sep-annotations: " "
+
+        - name: Build Container Image
+          id: build_image
+          uses: redhat-actions/buildah-build@v2
+          with:
+            containerfiles: |
+              .Containerfile
+            image: ${{ env.IMAGE_NAME }}
+            tags: ${{ steps.metadata.outputs.tags }}
+            labels: ${{ steps.metadata.outputs.labels }}
+            oci: false
+
+        - name: Stop early on pull request
+          if: github.event_name == 'pull_request'
+          run: |
+            echo -e "\e[1;34mGithub Build\e[0m  No push to repository on pull request!"
+            exit 0
+
+        # on PUSH only or SCCHEDULE!
+
+        - name: Rechunk the image
+          if: github.event_name != 'pull_request' || (github.ref_name == 'dev' && github.event_name == 'push')
+          id: rechunk
+          uses: hhd-dev/rechunk@v1.2.2
+          with:
+            rechunk: 'ghcr.io/hhd-dev/rechunk:v1.2.2'
+            ref: "localhost/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+            prev-ref: "${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+            skip_compression: true
+            version: ${{ env.FEDORA_VERSION }}
+            labels: ${{ steps.metadata.outputs.labels }}
+
+        - name: Login to GitHub Container Registry
+            uses: docker/login-action@v3
+            if: github.event_name != 'pull_request' || (github.ref_name == 'dev' && github.event_name == 'push')
+            with:
+              registry: ghcr.io
+              username: ${{ github.actor }}
+              password: ${{ secrets.GITHUB_TOKEN }}
+            
+        - name: Push To GHCR
+            uses: redhat-actions/push-to-registry@v2
+            if: github.event_name != 'pull_request' || (github.ref_name == 'dev' && github.event_name == 'push')
+            id: push
+            env:
+              REGISTRY_USER: ${{ github.actor }}
+              REGISTRY_PASSWORD: ${{ github.token }}
+            with:
+              registry: ${{ env.IMAGE_REGISTRY }}
+              image: ${{ env.IMAGE_NAME }}
+              tags: ${{ steps.metadata.outputs.tags }}
+              username: ${{ env.REGISTRY_USER }}
+              password: ${{ env.REGISTRY_PASSWORD }}
+
+        - name: Install Cosign
+            uses: sigstore/cosign-installer@v3.8.2
+            if: github.event_name != 'pull_request' || (github.ref_name == 'dev' && github.event_name == 'push')
+
+        - name: Sign container image
+            if: github.event_name != 'pull_request' || (github.ref_name == 'dev' && github.event_name == 'push')
+            run: |
+              IMAGE_FULL="${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}"
+              for tag in ${{ steps.metadata.outputs.tags }}; do
+                cosign sign -y --key env://COSIGN_PRIVATE_KEY $IMAGE_FULL:$tag
+              done
+            env:
+              TAGS: ${{ steps.push.outputs.digest }}
+              COSIGN_EXPERIMENTAL: false
+              COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}

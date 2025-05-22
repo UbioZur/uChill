@@ -1,0 +1,17 @@
+## ~  UbioZur - https://github.com/UbioZur  ~ ##
+
+[Unit]
+Description=Add Flathub flatpak repositories
+ConditionPathExists=!/var/lib/flatpak/.flathub-initialized
+Before=flatpak-system-helper.service
+After=network-online.target systemd-networkd-wait-online.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/flatpak remote-add --system --if-not-exists --title "Flathub Flatpaks" flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+ExecStartPost=/usr/bin/touch /var/lib/flatpak/.flathub-initialized
+
+[Install]
+WantedBy=multi-user.target

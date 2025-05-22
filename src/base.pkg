@@ -1,0 +1,19 @@
+## ~  UbioZur - https://github.com/UbioZur  ~ ##
+
+# List of packages to install with dnf
+# One package per line
+# Make sure package exist https://packages.fedoraproject.org/
+
+# Base CLI system utilities
+bat
+btop
+#eza      Not available on fedora42
+fastfetch
+fd-find
+make
+man-db
+micro
+podman-compose
+ripgrep
+trash-cli
+zoxide
