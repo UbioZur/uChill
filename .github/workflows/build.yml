@@ -4,7 +4,7 @@ name: Build uChill Image
 on:
 # Run the build every Mondays 08:00 JST, or Sundays 23:00 UTC
   schedule:
-    - cron: 'o 23 * * 0'
+    - cron: '0 23 * * 0'
 # Run on push of the main and dev branch
   push:
     branches:
