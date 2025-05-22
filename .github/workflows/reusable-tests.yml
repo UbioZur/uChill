@@ -32,7 +32,7 @@ jobs:
           if ! command -v just &> /dev/null; then
             echo -e "\e[1;34mGithub Tests\e[0m  Installing \e[36mjust\e[0m"
             curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/.just-bin
-            echo "::add-path::${HOME}/.just-bin"
+            echo "${HOME}/.just-bin" >> "$GITHUB_PATH"
           fi
 
       - name: Checking Justfile
