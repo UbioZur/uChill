@@ -81,15 +81,12 @@ jobs:
           sep-tags: " "
           sep-annotations: " "
 
-      - name: List files
-        run: ls -alR src
-
       - name: Build Container Image
         id: build_image
         uses: redhat-actions/buildah-build@v2
         with:
           context: src
-          containerfiles: src/.Containerfile
+          containerfiles: src/Containerfile
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
