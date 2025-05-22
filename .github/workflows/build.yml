@@ -66,17 +66,17 @@ jobs:
         id: metadata
         with:
           tags: |
-            type=raw,value=${IMAGE_TAG}
-            type=raw,value=${IMAGE_VTAG}
-            type=raw,value=${IMAGE_VTAG}-{{ date 'YYYYMMDDHHmm' }}
-          labels: |
+            type=raw,value=${{ env.IMAGE_TAG }}
+            type=raw,value=${{ env.IMAGE_VTAG }}
+            type=raw,value=${{ env.IMAGE_VTAG }}-{{ date 'YYYYMMDDHHmm' }}
+          labels: |  
             org.opencontainers.image.created=${{ steps.date.outputs.date }}
-            org.opencontainers.image.description=${IMAGE_DESC}
+            org.opencontainers.image.description=${ env.IMAGE_DESC }}
             org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}
             org.opencontainers.image.title=${{ github.event.repository.name }}
             org.opencontainers.image.url=https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}
             org.opencontainers.image.vendor=${{ github.repository_owner }}
-            org.opencontainers.image.version=${IMAGE_TAG}
+            org.opencontainers.image.version=${ env.IMAGE_TAG }}
             containers.bootc=1
           sep-tags: " "
           sep-annotations: " "
