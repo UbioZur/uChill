@@ -35,7 +35,7 @@ fi
 # Restore the stash
 log "Restore the stash"
 stashes=$(git stash list)
-if[[ $stashes == *"$stashName" ]]; then
+if [[ $stashes == "*$stashName" ]]; then
     git stash pop
 fi
 
