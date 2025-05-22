@@ -5,18 +5,22 @@ on:
 # Run the build every Mondays 08:00 JST, or Sundays 23:00 UTC
   schedule:
     - cron: 'o 23 * * 0'
+# Run on push of the main and dev branch
   push:
     branches:
       - main
       - dev
     paths:
       - 'src/**'
+# Partially run on pull_request (only check build)
   pull_request:
     branches:
       - main
       - dev
     path:
       - 'src/**'
+# Manual trigger when needed
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.brand_name}}-${{ inputs.stream_name }}
