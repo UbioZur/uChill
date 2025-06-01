@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+## ~  UbioZur - https://github.com/UbioZur  ~ ##
+
+# Fail quick and fast
+set -ueo pipefail
+
+exitCode=0
+
+# Log some Data to the output
+# usage: log "Some text to log" 
+log() {
+	echo -e "\e[1;34mpre-push\e[0m  $@"
+}
+
+log "Starting the git hook"
+
+# Stash before testing
+readonly stashName="pre-push-$(date +%s)"
+log "Stash name \e[36m${stashName}\e[0m"
+git stash save --keep-index --include-untracked $stashName
+
+# Run basic checks
+log "Run the checks"
+just check-all
+[[ $? -ne 0 ]] && exitCode=1
+
+# Make sure the container can build
+readonly branch=$(git rev-parse --abbrev-ref HEAD)
+if git diff --name-only "origin/$branch"...HEAD -- src | grep -q '^src/'; then
+    log "Trying to build the container..."
+    just pod-build
+    [[ $? -ne 0 ]] && exitCode=1
+fi
+
+# Restore the stash
+log "Restore the stash"
+stashes=$(git stash list)
+if [[ $stashes == "*$stashName" ]]; then
+    git stash pop
+fi
+
+exit $exitCode

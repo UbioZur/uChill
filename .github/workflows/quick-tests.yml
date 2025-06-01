@@ -1,0 +1,50 @@
+## ~  UbioZur - https://github.com  ~ ##
+---
+name: Run Quick Tests
+on:
+# Run on manual trigger
+  workflow_dispatch:
+# Mostly run it when called from other workflows
+  workflow_call:
+# Don't run tests on files that do not matter!
+  push:
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - 'docs/**'
+      - 'assets/**'
+      - '.github/**'
+  pull_request:
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
+      - '.gitignore'
+      - 'docs/**'
+      - 'assets/**'
+      - '.github/**'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Just (if needed)
+        run: |
+          if ! command -v just &> /dev/null; then
+            echo -e "\e[1;34mGithub Tests\e[0m  Installing \e[36mjust\e[0m"
+            curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/.just-bin
+            echo "${HOME}/.just-bin" >> "$GITHUB_PATH"
+          fi
+
+      - name: Checking Justfile
+        run: |
+          echo -e "\e[1;34mGithub Tests\e[0m  Checking \e[36mJustfile\e[0m"
+          just --unstable --fmt --check -f justfile
+
+      - name: Run all the tests
+        run: |
+          echo -e "\e[1;34mGithub Tests\e[0m  Running the quick test suit"
+          just check-quick

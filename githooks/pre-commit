@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+## ~  UbioZur - https://github.com/UbioZur  ~ ##
+
+# Fail quick and fast
+set -ueo pipefail
+
+exitCode=0
+
+# Log some Data to the output
+# usage: log "Some text to log" 
+log() {
+	echo -e "\e[1;34mpre-commit\e[0m  $@"
+}
+
+log "Starting the git hook"
+
+# Stash before testing
+readonly stashName="pre-commit-$(date +%s)"
+log "Stash name \e[36m${stashName}\e[0m"
+git stash save --keep-index --include-untracked $stashName
+
+# Get the list of files that are staged for commit
+readonly stagedFiles=$(git diff --cached --name-only --diff-filter=AM)
+
+# Run Basic checks
+log "Run the quick checks"
+just check-quick
+[[ $? -ne 0 ]] && exitCode=1
+
+# Restore the stash
+log "Restore the stash"
+stashes=$(git stash list)
+if [[ $stashes == "*$stashName" ]]; then
+    git stash pop
+fi
+
+exit $exitCode

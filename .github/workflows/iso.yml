@@ -1,0 +1,72 @@
+## ~  UbioZur - https://github.com  ~ ##
+---
+name: Build Stas ISO
+on:
+# Run on a schedule every 1st of the month at midnight UTC
+  schedule:
+    - cron: '0 0 1 * *'
+
+# Manual trigger when needed
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-${{ inputs.brand_name}}-${{ inputs.stream_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Load environement file
+        run: |
+          file=.env
+          source "$file"
+          while IFS='=' read -r key value; do
+            if [[ ! $key =~ ^# && -n $key ]]; then
+              echo "$key=$value" >> $GITHUB_ENV
+            fi
+          done < $file
+          [[ "${NVIDIA}" == "Y" ]] && VARIANT="-nvidia" || VARIANT=""
+          readonly FULLNAME=${IMAGE_NAME,,}${VARIANT,,}
+          echo "FULLNAME=${FULLNAME}" >> $GITHUB_ENV
+          echo "DATE=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
+
+      - name: Build ISO
+        uses: jasonn3/build-container-installer@main
+        id: build
+        with:
+          image_name: ${{ env.FULLNAME }}
+          image_repo: ghcr.io/ubiozur
+          image_tag: ${{ env.BASE_VERSION }}
+          version: ${{ env.BASE_VERSION }}
+          variant: kinoite
+          iso_name: ${{ env.FULLNAME }}-${{ env.BASE_VERSION }}-${{ env.DATE }}.iso
+
+      - name: Check ISO Output
+        run: |
+          echo "${{ steps.build.outputs.iso_path }}"
+          echo "${{ steps.build.outputs.iso_name }}"
+          ls -l "${{ steps.build.outputs.iso_path }}"
+
+      - name: Upload ISO as artifact
+        id: upload
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FULLNAME }}-${{ env.BASE_VERSION }}-${{ env.DATE }}
+          path: |
+            ${{ steps.build.outputs.iso_path }}/${{ steps.build.outputs.iso_name }}
+            ${{ steps.build.outputs.iso_path }}/${{ steps.build.outputs.iso_name }}-CHECKSUM
+          if-no-files-found: error
+          retention-days: 15
+          compression-level: 6

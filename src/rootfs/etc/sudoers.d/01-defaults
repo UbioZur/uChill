@@ -1,0 +1,4 @@
+## ~  UbioZur - https://github.com/UbioZur  ~ ##
+
+# Disabel the message on the first time using sudo
+Defaults  lecture="never"

@@ -1,0 +1,188 @@
+## ~ UbioZur - https://github.com/UbioZur  ~ ##
+MAINTAINER UbioZur
+
+# Base image ARGS
+ARG BASE_IMAGE="${BASE_IMAGE:-ghcr.io/ublue-os/base-main}"
+ARG BASE_VERSION="${BASE_VERSION:-42}"
+
+# Mount AKMods
+#FROM ghcr.io/ublue-os/akmods:bazzite-${BASE_VERSION} AS akmods
+#FROM ghcr.io/ublue-os/akmods-extra:bazzite-${BASE_VERSION} AS akmods-extra
+#FROM ghcr.io/ublue-os/akmods-nvidia-open:main-${BASE_VERSION} AS akmods_nvidia
+
+# Create the container image
+FROM ${BASE_IMAGE}:${BASE_VERSION}
+
+# Image Building Arguments
+ARG BASE_VERSION="${BASE_VERSION:-42}"
+
+ARG DEBUG="${DEBUG:-N}"
+ARG IMAGE_NAME="${IMAGE_NAME:-uChill}"
+ARG NVIDIA="${NVIDIA:-}"
+
+# Copy files to container
+COPY rootfs /
+
+# Add / Enable Repos and Coprs
+RUN --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=cache,dst=/var/roothome \
+    --mount=type=tmpfs,dst=/tmp \
+    set -euo pipefail && \
+    dnf5 -y --quiet --setopt=keepcache=1 remove \
+        htop firefox* ublue-os-update-service && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Add \e[36mrpm-fusion\e[0m repositories" && \
+    dnf5 -y install \
+        https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+        https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
+    ostree container commit
+
+# 2 Setup Kernel
+
+# Setup Firmware packages
+RUN --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=cache,dst=/var/roothome \
+    --mount=type=tmpfs,dst=/tmp \
+    set -euo pipefail && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Install \e[36mCLI\e[0m applications" && \
+    dnf5 -y --quiet --setopt=keepcache=1 --setopt=install_weak_deps=False install \
+        bat btop \
+        duf duff \
+        fastfetch fd-find fzf \
+        i2c-tools \
+        just jq \
+        libxcrypt-compat lm_sensors lsd lzip \
+        make man-db micro \
+        ncdu \
+        podman-compose python3-pip \
+        ripgrep \
+        p7zip p7zip-plugins \
+        rar \
+        thefuck tmux trash-cli \
+        zoxide \
+        --allowerasing && \
+    ostree container commit
+
+# Setup KDE
+RUN --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=cache,dst=/var/roothome \
+    --mount=type=tmpfs,dst=/tmp \
+    set -euo pipefail && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Install \e[36mKDE\e[0m and its applications" && \
+    dnf5 -y --quiet --setopt=keepcache=1 --setopt=install_weak_deps=False \
+        --setopt=excludepkgs=firefox,firefox-langpacks,kdeconnectd,kde-connect,plasma-welcome,konsole,konsole5,kfind \
+        install \
+        adwaita-gtk2-theme akonadi-server-mysql ark audiocd-kio \
+        bluedevil breeze-icon-theme \
+        colord-kde cups-pk-helper \
+        dolphin \
+        ffmpegthumbs firewall-config flatpak-kcm fprintd-pam \
+        glibc-all-langpacks \
+        kaccounts-integration-qt6 kaccounts-providers kcharselect kde-gtk-config \
+        kde-inotify-survey kde-partitionmanager kde-settings-pulseaudio kdebugsettings \
+        kdegraphics-thumbnailers kdenetwork-filesharing kdeplasma-addons kdialog kdnssd \
+        kf6-baloo-file kio-admin kio-gdrive kjournald kscreen kscreenlocker ksshaskpass \
+        kwalletmanager5 kwebkitpart kwin \
+        libappindicator-gtk3 \
+        NetworkManager-config-connectivity-fedora \
+        pam-kwallet phonon-qt6-backend-vlc pinentry-qt plasma-breeze plasma-desktop \
+        plasma-discover plasma-discover-notifier plasma-disks plasma-nm plasma-nm-l2tp \
+        plasma-nm-openconnect plasma-nm-openswan plasma-nm-openvpn plasma-nm-pptp plasma-nm-vpnc \
+        plasma-pa plasma-systemmonitor plasma-thunderbolt plasma-vault plasma-workspace \
+        plasma-workspace-wayland polkit-kde \
+        samba-usershares sddm sddm-breeze sddm-kcm sddm-wayland-plasma signon-kwallet-extension \
+        spectacle systemd-oomd-defaults \
+        toolbox \
+        udisks2 \
+        xwaylandvideobridge \
+        --allowerasing && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Cleaning unwanted packages" && \
+    dnf5 -y --quiet remove \
+        filelight firefox* \
+        kde-connect* kdeconnectd kcharselect kfind konsole konsole5 \
+        plasma-browser-integration plasma-welcome* && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Making sure firefox is gone" && \
+    set +e && \
+    rpm -e firefox-langpacks || true && \
+    rpm -e firefox || true && \
+    set -e && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Make sure important packages are installed!" && \
+    dnf5 list --installed | grep -E '^plasma-desktop\.|^sddm\.|^kwin\.'&& \
+    ostree container commit
+
+# Setup GUI applications
+RUN --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=cache,dst=/var/roothome \
+    --mount=type=tmpfs,dst=/tmp \
+    set -euo pipefail && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Install \e[36mGUI\e[0m applications" && \
+    dnf5 -y --quiet --setopt=keepcache=1 --setopt=install_weak_deps=False \
+        --setopt=excludepkgs=firefox,firefox-langpacks,kdeconnectd,kde-connect,plasma-welcome,konsole,konsole5,kfind \
+        install \
+        flatpak \
+        kitty kitty-shell-integration kitty-terminfo kamera \
+        plasma-discover-flatpak \
+        vlc vlc-plugin-ffmpeg vlc-plugin-pipewire vlc-plugins-extra \
+        waydroid \
+        xdg-terminal-exec xdg-user-dirs \
+        --allowerasing && \
+    ostree container commit
+
+# Setup Flatpak
+RUN --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=cache,dst=/var/roothome \
+    --mount=type=tmpfs,dst=/tmp \
+    set -euo pipefail && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Disable \e[36mFdora flatpak\e[0m" && \
+    systemctl disable flatpak-add-fedora-repos.service && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Enable \e[36mFlathub flatpak\e[0m" && \
+    mkdir -p /etc/flatpak/remotes.d && \
+    curl -Lo /etc/flatpak/remotes.d/flathub.flatpakrepo https://dl.flathub.org/repo/flathub.flatpakrepo && \
+    ostree container commit
+
+# Set Always changing files (like os-release)
+ARG DATE="${DATE:-YYYYMMDDHHmm}"
+RUN echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Setting up \e[36mos-release\e[0m file!" && \
+    sed -i "s|^PRETTY_NAME=.*|PRETTY_NAME=\"${IMAGE_NAME} Linux ${BASE_VERSION} [Fedora ${BASE_VERSION}]\"|" /etc/os-release && \
+    sed -i "s|^NAME=.*|NAME=\"${IMAGE_NAME} Linux (Fedora)\"|" /etc/os-release && \
+    sed -i "s|^VERSION=.*|VERSION=\"${BASE_VERSION}\"|" /etc/os-release && \
+    sed -i "s|^HOME_URL=.*|HOME_URL=\"https://github.com/UbioZur/${IMAGE_NAME}\"|" /etc/os-release && \
+    sed -i "s|^DOCUMENTATION_URL=.*|DOCUMENTATION_URL=\"https://github.com/UbioZur/${IMAGE_NAME}/wiki\"|" /etc/os-release && \
+    sed -i "s|^SUPPORT_URL=.*|SUPPORT_URL=\"https://github.com/UbioZur/${IMAGE_NAME}/issues\"|" /etc/os-release && \
+    sed -i "s|^BUG_REPORT_URL=.*|BUG_REPORT_URL=\"https://github.com/UbioZur/${IMAGE_NAME}/issues\"|" /etc/os-release && \
+    sed -i "s|^DEFAULT_HOSTNAME=.*|DEFAULT_HOSTNAME=\"${IMAGE_NAME,,}\"|" /etc/os-release && \
+    sed -i "s|^ID=.*|ID=\"${IMAGE_NAME,,}\"|" /etc/os-release && \
+    sed -i "s|^ID_LIKE=.*|ID_LIKE=\"fedora\"|" /etc/os-release && \
+    sed -i "s|^IMAGE_ID=.*|IMAGE_ID=\"${IMAGE_NAME,,}\"|" /etc/os-release && \
+    sed -i "s|^OSTREE_VERSION=.*|OSTREE_VERSION=\"${BASE_VERSION}.${DATE}\"|" /etc/os-release && \
+    sed -i "s|^IMAGE_VERSION=.*|IMAGE_VERSION=\"${BASE_VERSION}.${DATE}\"|" /etc/os-release && \
+    sed -i "s|^BUILD_ID=.*|BUILD_ID=\"${BASE_VERSION}.${DATE}\"|" /etc/os-release && \
+    sed -i "/^CPE_NAME=/d" /etc/os-release && \
+    sed -i "/^REDHAT_BUGZILLA_PRODUCT=/d" /etc/os-release && \
+    sed -i "/^REDHAT_BUGZILLA_PRODUCT_VERSION=/d" /etc/os-release && \
+    sed -i "/^REDHAT_SUPPORT_PRODUCT=/d" /etc/os-release && \
+    sed -i "/^REDHAT_SUPPORT_PRODUCT_VERSION=/d" /etc/os-release && \
+    echo "" && \
+    cat /etc/os-release && \
+    echo "" && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Fixing \e[36mEFI\e[0m!" && \
+    sed -i "s|^EFIDIR=.*|EFIDIR=\"fedora\"|" /usr/sbin/grub2-switch-to-blscfg
+
+RUN dnf5 copr list && \
+    dnf5 repolist --enabled && \
+    echo "" && \
+    du -ah /usr | sort -h | tail
+
+# Cleanup, lint and commit
+RUN echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Cleaning up!" && \
+    rm -rf /tmp/* && \
+    rm -rf /usr/etc && \
+    rm -rf /var/* && \
+    mkdir -vp /var/tmp && \
+    chmod -R 1777 /var/tmp && \
+    bootc container lint && \
+    ostree container commit

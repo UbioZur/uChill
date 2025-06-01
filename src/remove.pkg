@@ -1,0 +1,19 @@
+## ~  UbioZur - https://github.com/UbioZur  ~ ##
+
+# List of packages to remove with dnf
+# One package per line
+# Make sure package exist https://packages.fedoraproject.org/
+
+filelight
+firefox*
+gamemode
+htop
+kde-connect*
+kdeconnectd
+kcharselect
+kfind
+konsole
+konsole5
+plasma-browser-integration
+plasma-welcome*
+ublue-os-update-service
