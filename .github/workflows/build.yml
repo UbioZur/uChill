@@ -1,6 +1,6 @@
 ## ~  UbioZur - https://github.com  ~ ##
 ---
-name: Build Stas Image
+name: Build uChill Image
 on:
 # Run on a schedule every UTC Monday & Thursday 23:00
 # or JST Tuesday & Friday 8:00

@@ -1,6 +1,6 @@
 ## ~  UbioZur - https://github.com  ~ ##
 ---
-name: Build Stas ISO
+name: Build uChill ISO
 on:
 # Run on a schedule every 1st of the month at midnight UTC
   schedule:
