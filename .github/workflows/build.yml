@@ -53,7 +53,7 @@ jobs:
           done < $file
           [[ "${NVIDIA}" == "Y" ]] && VARIANT="-nvidia" || VARIANT=""
           FULLNAME=${IMAGE_NAME,,}${VARIANT,,}
-          [[ "${{ github.ref_name }} != "main" ]] && FULLNAME=${FULLNAME}-${{ github.ref_name }}
+          [[ "${{ github.ref_name }}" != "main" ]] && FULLNAME=${FULLNAME}-${{ github.ref_name }}
           echo "FULLNAME=${FULLNAME}" >> $GITHUB_ENV
           echo "DATE=$(date -u +%Y%m%d%H%M)" >> $GITHUB_ENV
           echo "DATELONG=$(date -u +%Y\-%m\-%d\T%H\:%M\:%S\Z)" >> $GITHUB_ENV
