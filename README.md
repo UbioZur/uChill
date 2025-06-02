@@ -16,9 +16,9 @@
 
 This setup also helps me learn about:
 
-* **Building and sharing software in containers**
-* **Automating development workflows** with GitHub Actions (CI/CD)
-* **Streamlining command-line tasks** using Justfile
+- **Building and sharing software in containers**
+- **Automating development workflows** with GitHub Actions (CI/CD)
+- **Streamlining command-line tasks** using Justfile
 
 ## Atomic Desktops
 
@@ -26,18 +26,45 @@ Linux Atomic Desktops signify a modern approach to computing where the core oper
 
 ## Available Containers
 
-* [ghcr.io/ubiozur/uchill](https://github.com/UbioZur/uChill/pkgs/container/uchill) Stable release of uChill.
+- [ghcr.io/ubiozur/uchill](https://github.com/UbioZur/uChill/pkgs/container/uchill) Stable release of uChill.
 
 ## Base System
 
-* Built on **Fedora 42**
-* Uses [uBlue-os base-main](https://github.com/ublue-os/main) as the base image
-* Minimal **KDE Plasma**
+- Built on **Fedora 42**
+- Uses [uBlue-os base-main](https://github.com/ublue-os/main) as the base image
+- Minimal **KDE Plasma**
+- **Signed** image
 
 ## Features
 
-* `bat`, `fastfetch`, `lsd`, `micro`, `ripgrep`, `zoxide` and more
-* Flathub
-* Kitty Terminal
-* Podman, Distrobox and Toolbox
-* Waydroid
+- `bat`, `fastfetch`, `lsd`, `micro`, `ripgrep`, `zoxide` and more
+- Flathub
+- Kitty Terminal
+- Podman, Distrobox and Toolbox
+- Waydroid
+
+## Bootc commands
+
+- To **Switch to uChill** from an existing Atomic / uBlue image
+
+```bash
+sudo bootc switch --enforce-container-sigpolicy ghcr.io/ubiozur/uchill:latest
+```
+
+- To **check** if an upgrade is available
+
+```bash
+sudo bootc upgrade --check
+```
+
+- To apply an **upgrade**
+
+```bash
+sudo bootc upgrade ---apply
+```
+
+- To **rollback** to the previous image
+
+```bash
+sudo bootc rollback
+```
