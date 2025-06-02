@@ -88,10 +88,10 @@ RUN --mount=type=cache,dst=/var/cache \
         libappindicator-gtk3 \
         NetworkManager-config-connectivity-fedora \
         pam-kwallet phonon-qt6-backend-vlc pinentry-qt plasma-breeze plasma-desktop \
-        plasma-discover plasma-discover-notifier plasma-disks plasma-nm plasma-nm-l2tp \
-        plasma-nm-openconnect plasma-nm-openswan plasma-nm-openvpn plasma-nm-pptp plasma-nm-vpnc \
-        plasma-pa plasma-systemmonitor plasma-thunderbolt plasma-vault plasma-workspace \
-        plasma-workspace-wayland polkit-kde \
+        plasma-discover plasma-discover-notifier plasma-disks plasma-firewall plasma-milou \
+        plasma-nm plasma-nm-l2tp plasma-nm-openconnect plasma-nm-openswan plasma-nm-openvpn \
+        plasma-nm-pptp plasma-nm-vpnc plasma-pa plasma-systemmonitor plasma-systemsettings \
+        plasma-thunderbolt plasma-vault plasma-workspace plasma-workspace-wayland polkit-kde \
         samba-usershares sddm sddm-breeze sddm-kcm sddm-wayland-plasma signon-kwallet-extension \
         spectacle systemd-oomd-defaults \
         toolbox \
