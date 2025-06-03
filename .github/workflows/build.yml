@@ -32,6 +32,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        nvidia: ['N', 'Y']
 
     permissions:
       contents: read
@@ -51,6 +54,8 @@ jobs:
               echo "$key=$value" >> $GITHUB_ENV
             fi
           done < $file
+          NVIDIA="${{ matrix.nvidia }}"
+          echo "NVIDIA=${NVIDIA}" >> $GITHUB_ENV
           [[ "${NVIDIA}" == "Y" ]] && VARIANT="-nvidia" || VARIANT=""
           FULLNAME=${IMAGE_NAME,,}${VARIANT,,}
           [[ "${{ github.ref_name }}" != "main" ]] && FULLNAME=${FULLNAME}-${{ github.ref_name }}
@@ -94,6 +99,8 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
           oci: false
+          build-args:
+            NVIDIA: ${{ env.NVIDIA }}
 
       # From now, only do on schedule and push
       - name: Login to GitHub Container Registry

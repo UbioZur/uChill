@@ -8,7 +8,7 @@ ARG BASE_VERSION="${BASE_VERSION:-42}"
 # Mount AKMods
 #FROM ghcr.io/ublue-os/akmods:bazzite-${BASE_VERSION} AS akmods
 #FROM ghcr.io/ublue-os/akmods-extra:bazzite-${BASE_VERSION} AS akmods-extra
-#FROM ghcr.io/ublue-os/akmods-nvidia-open:main-${BASE_VERSION} AS akmods_nvidia
+FROM ghcr.io/ublue-os/akmods-nvidia-open:main-${BASE_VERSION} AS akmods_nvidia
 
 # Create the container image
 FROM ${BASE_IMAGE}:${BASE_VERSION}
@@ -35,11 +35,13 @@ RUN --mount=type=cache,dst=/var/cache \
     dnf5 -y install \
         https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
         https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Enable \e[36mopench264\e[0m repository" && \
+    dnf5 config-manager setopt fedora-cisco-openh264.enabled=1 && \
     ostree container commit
 
 # 2 Setup Kernel
 
-# Setup Firmware packages
+# Setup base packages
 RUN --mount=type=cache,dst=/var/cache \
     --mount=type=cache,dst=/var/log \
     --mount=type=cache,dst=/var/roothome \
@@ -137,16 +139,35 @@ RUN --mount=type=cache,dst=/var/cache \
     --mount=type=cache,dst=/var/roothome \
     --mount=type=tmpfs,dst=/tmp \
     set -euo pipefail && \
-    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Disable \e[36mFdora flatpak\e[0m" && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Disable \e[36mFedora flatpak\e[0m" && \
     systemctl disable flatpak-add-fedora-repos.service && \
     echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Enable \e[36mFlathub flatpak\e[0m" && \
     mkdir -p /etc/flatpak/remotes.d && \
     curl -Lo /etc/flatpak/remotes.d/flathub.flatpakrepo https://dl.flathub.org/repo/flathub.flatpakrepo && \
     ostree container commit
 
+# Setup Non Nvidia Drivers
+RUN --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=cache,dst=/var/roothome \
+    --mount=type=tmpfs,dst=/tmp \
+    --mount=type=bind,from=akmods_nvidia,src=/rpms,dst=/tmp/akmods-nv-rpms \
+    set -euo pipefail && \
+	if [[ "$NVIDIA" != "Y" ]];then exit 0; fi  && \
+	echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Installing \e[36mNVidia\e[0m drivers" && \
+	curl -Lo /tmp/nvidia-install.sh https://raw.githubusercontent.com/ublue-os/main/refs/heads/main/build_files/nvidia-install.sh && \
+	chmod +x /tmp/nvidia-install.sh && \
+	AKMODNV_PATH=/tmp/akmods-nv-rpms /tmp/nvidia-install.sh && \
+    ostree container commit
+
 # Set Always changing files (like os-release)
 ARG DATE="${DATE:-YYYYMMDDHHmm}"
-RUN echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Setting up \e[36mos-release\e[0m file!" && \
+RUN --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=cache,dst=/var/roothome \
+    --mount=type=tmpfs,dst=/tmp \
+    set -euo pipefail && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Setting up \e[36mos-release\e[0m file!" && \
     sed -i "s|^PRETTY_NAME=.*|PRETTY_NAME=\"${IMAGE_NAME} Linux ${BASE_VERSION} [Fedora ${BASE_VERSION}]\"|" /etc/os-release && \
     sed -i "s|^NAME=.*|NAME=\"${IMAGE_NAME} Linux (Fedora)\"|" /etc/os-release && \
     sed -i "s|^VERSION=.*|VERSION=\"${BASE_VERSION}\"|" /etc/os-release && \
@@ -170,12 +191,18 @@ RUN echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Setting up \e[36mos-release\e[0m file!
     cat /etc/os-release && \
     echo "" && \
     echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Fixing \e[36mEFI\e[0m!" && \
-    sed -i "s|^EFIDIR=.*|EFIDIR=\"fedora\"|" /usr/sbin/grub2-switch-to-blscfg
+    sed -i "s|^EFIDIR=.*|EFIDIR=\"fedora\"|" /usr/sbin/grub2-switch-to-blscfg #&& \
+    #echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Ensure \e[36minitramfs\e[0m is generated" && \
+    #KERNEL_VERSION="$(rpm -q --queryformat="%{evr}.%{arch}" kernel-core)" && \
+    #/usr/bin/dracut --no-hostonly --kver "${KERNEL_VERSION}" --reproducible -v --add ostree \
+    #	-f "/lib/modules/${KERNEL_VERSION}/initramfs.img" && \
+    #chmod 0600 "/lib/modules/${KERNEL_VERSION}/initramfs.img" && \
+    #ostree container commit
 
-RUN dnf5 copr list && \
-    dnf5 repolist --enabled && \
-    echo "" && \
-    du -ah /usr | sort -h | tail
+#RUN dnf5 copr list && \
+#    dnf5 repolist --enabled && \
+#    echo "" && \
+#    du -ah /usr | sort -h | tail
 
 # Cleanup, lint and commit
 RUN echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Cleaning up!" && \
