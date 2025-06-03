@@ -42,6 +42,9 @@ jobs:
       id-token: write
 
     steps:
+      - name: Clearup some spaces
+        run: rm -rf /opt/hostedtoolcache
+
       - name: Checkout Code
         uses: actions/checkout@v4
 
