@@ -100,7 +100,7 @@ jobs:
           labels: ${{ steps.metadata.outputs.labels }}
           oci: false
           build-args:
-            NVIDIA: ${{ env.NVIDIA }}
+            NVIDIA=${{ env.NVIDIA }}
 
       # From now, only do on schedule and push
       - name: Login to GitHub Container Registry
