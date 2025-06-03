@@ -27,6 +27,7 @@ Linux Atomic Desktops signify a modern approach to computing where the core oper
 ## Available Containers
 
 - [ghcr.io/ubiozur/uchill](https://github.com/UbioZur/uChill/pkgs/container/uchill) Stable release of uChill.
+- [ghcr.io/ubiozur/uchill-nvidia](https://github.com/UbioZur/uChill/pkgs/container/uchill-nvidia) NVidia verson of uChill.
 
 ## Base System
 
