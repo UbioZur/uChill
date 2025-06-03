@@ -133,6 +133,17 @@ RUN --mount=type=cache,dst=/var/cache \
         --allowerasing && \
     ostree container commit
 
+# Setup Wine (For Affinity Suite)
+RUN --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=cache,dst=/var/roothome \
+    --mount=type=tmpfs,dst=/tmp \
+    set -euo pipefail && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Install \e[36mWine\e[0m" && \
+     dnf5 -y --quiet --setopt=keepcache=1 --setopt=install_weak_deps=False install \
+		wine \
+		winetricks
+
 # Setup Flatpak
 RUN --mount=type=cache,dst=/var/cache \
     --mount=type=cache,dst=/var/log \
