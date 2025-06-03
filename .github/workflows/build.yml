@@ -45,6 +45,7 @@ jobs:
       - name: Clean up some space
         uses: jlumbroso/free-disk-space@main
         with:
+          tool-cache: true
           docker-images: false
         
       - name: Checkout Code
