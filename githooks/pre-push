@@ -28,7 +28,7 @@ just check-all
 readonly branch=$(git rev-parse --abbrev-ref HEAD)
 if git diff --name-only "origin/$branch"...HEAD -- src | grep -q '^src/'; then
     log "Trying to build the container..."
-    just pod-build
+    just check-build
     [[ $? -ne 0 ]] && exitCode=1
 fi
 
