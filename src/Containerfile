@@ -40,6 +40,17 @@ RUN --mount=type=cache,dst=/var/cache \
     ostree container commit
 
 # 2 Setup Kernel
+RUN --mount=type=cache,dst=/var/cache \
+    --mount=type=cache,dst=/var/log \
+    --mount=type=cache,dst=/var/roothome \
+    --mount=type=tmpfs,dst=/tmp \
+    set -euo pipefail && \
+    echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Install \e[36mKernel Headers\e[0m" && \
+    dnf5 -y --quiet --setopt=keepcache=1 --setopt=install_weak_deps=False install \
+        kernel-headers \
+        --allowerasing && \
+    ostree container commit
+
 
 # Setup base packages
 RUN --mount=type=cache,dst=/var/cache \
