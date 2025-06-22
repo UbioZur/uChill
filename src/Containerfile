@@ -37,6 +37,7 @@ RUN --mount=type=cache,dst=/var/cache \
         https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
     echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Enable \e[36mopench264\e[0m repository" && \
     dnf5 config-manager setopt fedora-cisco-openh264.enabled=1 && \
+    dnf5 config-manager addrepo --from-repofile=/etc/yum.repos.d/netbird.repo --overwrite && \
     ostree container commit
 
 # 2 Setup Kernel
@@ -137,6 +138,8 @@ RUN --mount=type=cache,dst=/var/cache \
         install \
         flatpak \
         kitty kitty-shell-integration kitty-terminfo kamera \
+        libappindicator libappindicator-gtk3 \
+        netbird netbird-ui \
         plasma-discover-flatpak \
         vlc vlc-plugin-ffmpeg vlc-plugin-pipewire vlc-plugins-extra \
         waydroid \
@@ -213,13 +216,8 @@ RUN --mount=type=cache,dst=/var/cache \
     cat /etc/os-release && \
     echo "" && \
     echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Fixing \e[36mEFI\e[0m!" && \
-    sed -i "s|^EFIDIR=.*|EFIDIR=\"fedora\"|" /usr/sbin/grub2-switch-to-blscfg #&& \
-    #echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Ensure \e[36minitramfs\e[0m is generated" && \
-    #KERNEL_VERSION="$(rpm -q --queryformat="%{evr}.%{arch}" kernel-core)" && \
-    #/usr/bin/dracut --no-hostonly --kver "${KERNEL_VERSION}" --reproducible -v --add ostree \
-    #	-f "/lib/modules/${KERNEL_VERSION}/initramfs.img" && \
-    #chmod 0600 "/lib/modules/${KERNEL_VERSION}/initramfs.img" && \
-    #ostree container commit
+    sed -i "s|^EFIDIR=.*|EFIDIR=\"fedora\"|" /usr/sbin/grub2-switch-to-blscfg && \
+    ostree container commit
 
 #RUN dnf5 copr list && \
 #    dnf5 repolist --enabled && \
