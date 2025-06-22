@@ -6,8 +6,7 @@ ARG BASE_IMAGE="${BASE_IMAGE:-ghcr.io/ublue-os/base-main}"
 ARG BASE_VERSION="${BASE_VERSION:-42}"
 
 # Mount AKMods
-#FROM ghcr.io/ublue-os/akmods:bazzite-${BASE_VERSION} AS akmods
-#FROM ghcr.io/ublue-os/akmods-extra:bazzite-${BASE_VERSION} AS akmods-extra
+FROM ghcr.io/ublue-os/akmods:main-${BASE_VERSION} AS akmods
 FROM ghcr.io/ublue-os/akmods-nvidia-open:main-${BASE_VERSION} AS akmods_nvidia
 
 # Create the container image
@@ -45,13 +44,16 @@ RUN --mount=type=cache,dst=/var/cache \
     --mount=type=cache,dst=/var/log \
     --mount=type=cache,dst=/var/roothome \
     --mount=type=tmpfs,dst=/tmp \
+    --mount=type=bind,from=akmods,src=/kernel-rpms,dst=/tmp/kernel-rpms \
+    --mount=type=bind,from=akmods,src=/rpms,dst=/tmp/akmods-rpms \
     set -euo pipefail && \
     echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Install \e[36mKernel Headers\e[0m" && \
     dnf5 -y --quiet --setopt=keepcache=1 --setopt=install_weak_deps=False install \
         kernel-headers \
+        /tmp/akmods-rpms/kmods/*openrazer*.rpm \
+        /tmp/akmods-rpms/kmods/*v4l2loopback*.rpm \
         --allowerasing && \
     ostree container commit
-
 
 # Setup base packages
 RUN --mount=type=cache,dst=/var/cache \
