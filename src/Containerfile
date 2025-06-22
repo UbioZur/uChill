@@ -44,14 +44,11 @@ RUN --mount=type=cache,dst=/var/cache \
     --mount=type=cache,dst=/var/log \
     --mount=type=cache,dst=/var/roothome \
     --mount=type=tmpfs,dst=/tmp \
-    --mount=type=bind,from=akmods,src=/kernel-rpms,dst=/tmp/kernel-rpms \
     --mount=type=bind,from=akmods,src=/rpms,dst=/tmp/akmods-rpms \
     set -euo pipefail && \
     echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Install \e[36mKernel Headers\e[0m" && \
     dnf5 -y --quiet --setopt=keepcache=1 --setopt=install_weak_deps=False install \
         kernel-headers \
-        /tmp/akmods-rpms/kmods/*openrazer*.rpm \
-        /tmp/akmods-rpms/kmods/*v4l2loopback*.rpm \
         --allowerasing && \
     ostree container commit
 
@@ -233,5 +230,7 @@ RUN echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Cleaning up!" && \
     rm -rf /var/* && \
     mkdir -vp /var/tmp && \
     chmod -R 1777 /var/tmp && \
+    mkdir -p /var/log/netbird && \
+    chmod 755 /var/log/netbird && \
     bootc container lint && \
     ostree container commit
