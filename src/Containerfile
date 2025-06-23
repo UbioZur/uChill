@@ -50,6 +50,7 @@ RUN --mount=type=cache,dst=/var/cache \
     dnf5 -y --quiet --setopt=keepcache=1 --setopt=install_weak_deps=False install \
         kernel-headers \
         --allowerasing && \
+    dnf5 -y --quiet install /tmp/akmods-rpms/kmods/*v4l2loopback*.rpm && \
     ostree container commit
 
 # Setup base packages
