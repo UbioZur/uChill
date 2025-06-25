@@ -64,6 +64,7 @@ RUN --mount=type=cache,dst=/var/cache \
         bat btop \
         duf duff \
         fastfetch fd-find fzf \
+        hugo \
         i2c-tools \
         just jq \
         libxcrypt-compat lm_sensors lsd lzip \
