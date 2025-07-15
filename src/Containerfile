@@ -98,8 +98,8 @@ RUN --mount=type=cache,dst=/var/cache \
         kaccounts-integration-qt6 kaccounts-providers kcharselect kde-gtk-config \
         kde-inotify-survey kde-partitionmanager kde-settings-pulseaudio kdebugsettings \
         kdegraphics-thumbnailers kdenetwork-filesharing kdeplasma-addons kdialog kdnssd \
-        kf6-baloo-file kio-admin kio-gdrive kjournald kscreen kscreenlocker ksshaskpass \
-        kwalletmanager5 kwebkitpart kwin \
+        kdotool kf6-baloo-file kio-admin kio-gdrive kjournald kscreen kscreenlocker \
+        ksshaskpass kwalletmanager5 kwebkitpart kwin \
         libappindicator-gtk3 \
         NetworkManager-config-connectivity-fedora \
         pam-kwallet phonon-qt6-backend-vlc pinentry-qt plasma-breeze plasma-desktop \
@@ -111,6 +111,7 @@ RUN --mount=type=cache,dst=/var/cache \
         spectacle systemd-oomd-defaults \
         toolbox \
         udisks2 \
+        ydotool \
         xwaylandvideobridge \
         --allowerasing && \
     echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Cleaning unwanted packages" && \
