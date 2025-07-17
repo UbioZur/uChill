@@ -37,6 +37,7 @@ RUN --mount=type=cache,dst=/var/cache \
     echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Enable \e[36mopench264\e[0m repository" && \
     dnf5 config-manager setopt fedora-cisco-openh264.enabled=1 && \
     dnf5 config-manager addrepo --from-repofile=/etc/yum.repos.d/netbird.repo --overwrite && \
+    rpmkeys --import https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg
     ostree container commit
 
 # 2 Setup Kernel
@@ -139,6 +140,7 @@ RUN --mount=type=cache,dst=/var/cache \
     dnf5 -y --quiet --setopt=keepcache=1 --setopt=install_weak_deps=False \
         --setopt=excludepkgs=firefox,firefox-langpacks,kdeconnectd,kde-connect,plasma-welcome,konsole,konsole5,kfind \
         install \
+        codium \
         flatpak \
         kitty kitty-shell-integration kitty-terminfo kamera \
         libappindicator libappindicator-gtk3 \
