@@ -61,6 +61,7 @@ RUN --mount=type=cache,dst=/var/cache \
     set -euo pipefail && \
     echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Install \e[36mCLI\e[0m applications" && \
     dnf5 -y --quiet --setopt=keepcache=1 --setopt=install_weak_deps=False install \
+        ansible \
         bat btop \
         duf duff \
         fastfetch fd-find fzf \
