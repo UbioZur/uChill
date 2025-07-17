@@ -74,7 +74,7 @@ RUN --mount=type=cache,dst=/var/cache \
         ripgrep \
         p7zip p7zip-plugins \
         rar \
-        thefuck tmux trash-cli \
+        thefuck tldr tmux trash-cli \
         zoxide \
         --allowerasing && \
     ostree container commit
