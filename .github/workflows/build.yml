@@ -2,27 +2,27 @@
 ---
 name: Build uChill Image
 on:
-# Run on a schedule every UTC Monday & Thursday 23:00
-# or JST Tuesday & Friday 8:00
-# only run on default branch (main)
+  # Run on a schedule every UTC Monday & Thursday 23:00
+  # or JST Tuesday & Friday 8:00
+  # only run on default branch (main)
   schedule:
-    - cron: '0 23 * * MON,THU'
+    - cron: "0 23 * * MON,THU"
 
-# Run on push of the main and dev branch
+  # Run on push of the main and dev branch
   push:
     branches:
       - main
       - dev
     paths:
-      - 'src/**'
-# Partially run on pull_request (only check build)
+      - "src/**"
+  # Partially run on pull_request (only check build)
   pull_request:
     branches:
       - main
       - dev
     paths:
-      - 'src/**'
-# Manual trigger when needed
+      - "src/**"
+  # Manual trigger when needed
   workflow_dispatch:
 
 concurrency:
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        nvidia: ['N', 'Y']
+        nvidia: ["N", "Y"]
 
     permissions:
       contents: read
@@ -47,7 +47,7 @@ jobs:
         with:
           tool-cache: true
           docker-images: false
-        
+
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -105,8 +105,7 @@ jobs:
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
           oci: false
-          build-args:
-            NVIDIA=${{ env.NVIDIA }}
+          build-args: NVIDIA=${{ env.NVIDIA }}
 
       # From now, only do on schedule and push
       - name: Login to GitHub Container Registry
@@ -146,3 +145,36 @@ jobs:
           TAGS: ${{ steps.push.outputs.digest }}
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+
+  notify_success:
+    needs: build
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Matrix success notification
+        uses: fadenb/matrix-chat-message@v0.0.6
+        with:
+          homeserver: "matrix.org"
+          token: ${{ secrets.MATRIX_TOKEN }}
+          channel: ${{ secrets.MATRIX_CHANNEL }}
+          message: |
+            ✅ GitHub Action ${{ github.workflow }} completed successfully!
+            Commit: ${{ github.sha }}
+            NVidia: ${{ needs.build.outputs.nvidia }}
+
+  notify_failure:
+    needs: build
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Matrix success notification
+        uses: fadenb/matrix-chat-message@v0.0.6
+        with:
+          homeserver: "matrix.org"
+          token: ${{ secrets.MATRIX_TOKEN }}
+          channel: ${{ secrets.MATRIX_CHANNEL }}
+          message: |
+            🚨 GitHub Action ${{ github.workflow }} **FAILED**!
+            Commit: ${{ github.sha }}
+            NVidia: ${{ needs.build.outputs.nvidia }}
+            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View failed run>
