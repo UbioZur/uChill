@@ -146,35 +146,35 @@ jobs:
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
 
-  notify_success:
-    needs: build
-    if: success()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Matrix success notification
-        uses: fadenb/matrix-chat-message@v0.0.6
-        with:
-          homeserver: "matrix.org"
-          token: ${{ secrets.MATRIX_TOKEN }}
-          channel: ${{ secrets.MATRIX_CHANNEL }}
-          message: |
-            ✅ GitHub Action ${{ github.workflow }} completed successfully!
-            Commit: ${{ github.sha }}
-            NVidia: ${{ needs.build.outputs.nvidia }}
+#  notify_success:
+#    needs: build
+#    if: success()
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Send Matrix success notification
+#        uses: fadenb/matrix-chat-message@v0.0.6
+#        with:
+#          homeserver: "matrix.org"
+#          token: ${{ secrets.MATRIX_TOKEN }}
+#          channel: ${{ secrets.MATRIX_CHANNEL }}
+#          message: |
+#            ✅ GitHub Action ${{ github.workflow }} completed successfully!
+#            Commit: ${{ github.sha }}
+#            NVidia: ${{ needs.build.outputs.nvidia }}
 
-  notify_failure:
-    needs: build
-    if: failure()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Matrix success notification
-        uses: fadenb/matrix-chat-message@v0.0.6
-        with:
-          homeserver: "matrix.org"
-          token: ${{ secrets.MATRIX_TOKEN }}
-          channel: ${{ secrets.MATRIX_CHANNEL }}
-          message: |
-            🚨 GitHub Action ${{ github.workflow }} **FAILED**!
-            Commit: ${{ github.sha }}
-            NVidia: ${{ needs.build.outputs.nvidia }}
-            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View failed run>
+#  notify_failure:
+#    needs: build
+#    if: failure()
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Send Matrix success notification
+#        uses: fadenb/matrix-chat-message@v0.0.6
+#        with:
+#          homeserver: "matrix.org"
+#          token: ${{ secrets.MATRIX_TOKEN }}
+#          channel: ${{ secrets.MATRIX_CHANNEL }}
+#          message: |
+#            🚨 GitHub Action ${{ github.workflow }} **FAILED**!
+#            Commit: ${{ github.sha }}
+#            NVidia: ${{ needs.build.outputs.nvidia }}
+#            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View failed run>
