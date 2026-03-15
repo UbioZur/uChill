@@ -147,7 +147,7 @@ RUN --mount=type=cache,dst=/var/cache \
         netbird netbird-ui \
         plasma-discover-flatpak \
         vlc vlc-plugin-ffmpeg vlc-plugin-pipewire vlc-plugins-extra \
-        waydroid \
+        #waydroid \
         xdg-terminal-exec xdg-user-dirs \
         --allowerasing && \
     ostree container commit
