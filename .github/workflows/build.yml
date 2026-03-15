@@ -49,7 +49,7 @@ jobs:
           docker-images: false
 
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Load environement file
         run: |
@@ -76,7 +76,7 @@ jobs:
           echo "DESC=$desc" >> $GITHUB_ENV
 
       - name: Image Metadata
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         id: metadata
         with:
           tags: |
