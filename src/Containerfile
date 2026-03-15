@@ -199,6 +199,7 @@ RUN --mount=type=cache,dst=/var/cache \
 	if [[ "$NVIDIA" != "Y" ]];then exit 0; fi  && \
 	echo -e " \e[1;34m${IMAGE_NAME}\e[0m  Installing \e[36mNVidia\e[0m drivers" && \
 	curl -Lo /tmp/nvidia-install.sh https://raw.githubusercontent.com/ublue-os/main/refs/heads/main/build_files/nvidia-install.sh && \
+    sed -i '/^cp \/etc\/modprobe\.d\/nvidia-modeset\.conf \/usr\/lib\/modprobe\.d\/nvidia-modeset\.conf/s/^/#[ ]*/' /tmp/nvidia-install.sh && \
 	chmod +x /tmp/nvidia-install.sh && \
 	AKMODNV_PATH=/tmp/akmods-nv-rpms /tmp/nvidia-install.sh && \
     ostree container commit
