@@ -191,6 +191,6 @@ vlc
 vlc-plugin-ffmpeg
 vlc-plugin-pipewire
 vlc-plugins-extra
-waydroid
+# waydroid
 xdg-terminal-exec
 xdg-user-dirs

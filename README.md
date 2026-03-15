@@ -31,7 +31,7 @@ Linux Atomic Desktops signify a modern approach to computing where the core oper
 
 ## Base System
 
-- Built on **Fedora 42**
+- Built on **Fedora 43**
 - Uses [uBlue-os base-main](https://github.com/ublue-os/main) as the base image
 - Minimal **KDE Plasma**
 - **Signed** image

@@ -1,9 +1,8 @@
 ## ~ UbioZur - https://github.com/UbioZur  ~ ##
-MAINTAINER UbioZur
 
 # Base image ARGS
 ARG BASE_IMAGE="${BASE_IMAGE:-ghcr.io/ublue-os/base-main}"
-ARG BASE_VERSION="${BASE_VERSION:-42}"
+ARG BASE_VERSION="${BASE_VERSION:-43}"
 
 # Mount AKMods
 FROM ghcr.io/ublue-os/akmods:main-${BASE_VERSION} AS akmods
@@ -13,7 +12,7 @@ FROM ghcr.io/ublue-os/akmods-nvidia-open:main-${BASE_VERSION} AS akmods_nvidia
 FROM ${BASE_IMAGE}:${BASE_VERSION}
 
 # Image Building Arguments
-ARG BASE_VERSION="${BASE_VERSION:-42}"
+ARG BASE_VERSION="${BASE_VERSION:-43}"
 
 ARG DEBUG="${DEBUG:-N}"
 ARG IMAGE_NAME="${IMAGE_NAME:-uChill}"
